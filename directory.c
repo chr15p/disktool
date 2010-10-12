@@ -206,8 +206,6 @@ void print_entities(GHashTable* hash,Filesearch search[],char * format)
 	while((search->cols)[i].location != NULL){
 		if((search->cols)[i].printfunc!=NULL){
 	       		((search->cols)[i].printfunc)(hash,(search->cols)[i].heading,(search->cols)[i].location,format,search->flags);
-		}else{
-			printf(format,""); 
 		}
 		i++;
 	}
@@ -220,10 +218,8 @@ void print_headers(Filesearch search[],char * format)
 	int i=0;
 
 	while((search->cols)[i].location != NULL){
-		if((search->cols)[i].heading!=NULL){
+		if((search->cols)[i].printfunc!=NULL){
 			printf(format,(search->cols)[i].heading);
-		}else{
-			printf(format,""); 
 		}
 		i++;
 	}
