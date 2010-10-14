@@ -123,6 +123,7 @@ char * file_contents(char * path,char * location)
 	int attrfile;
 
 	//printf("location=%s\n",location);
+	
 	file=(char*)malloc(strlen(path)+strlen(location)+1);
 	strcpy(file,path);
 	strcat(file,location);
@@ -168,7 +169,58 @@ int get_file_contents(GHashTable *hash,char * path,char * location,int flags)
 }
 
 
+int delete(GHashTable *hash,char * path,char * location,int flags)
+{
+	char * dev;
+	int fd;
+	char * deletefile;
+	int delete_fd;
+	char buf[512];
 
+	//printf("delete\n");
+	dev=(char*)malloc(15);
+	strcpy(dev,"/dev/");
+	strcat(dev, (char*)g_hash_table_lookup(hash,"hostname"));
+
+	fd=open(dev,O_RDONLY);
+	if(fd < 0)
+	{
+		//if we can't open it then it probably doesn't exist
+		//but we'll claim its ok just to be safe
+		free(dev);
+		return 0;
+	}
+
+	free(dev);
+
+
+	if(read(fd,buf,sizeof(buf)) < 0)
+	{
+		//if the device node exists but can't be read from then it doesn't exist
+ 
+		deletefile=(char*)malloc(strlen(path)+strlen(location)+1);
+		strcpy(deletefile,path);
+		strcat(deletefile,location);
+
+		delete_fd=open(deletefile,O_WRONLY);
+		if(delete_fd==-1){
+			fprintf(stderr,"unable to open %s\n",deletefile);
+			return 1;
+		}
+		write(delete_fd,"1",strlen("1"));
+		close(delete_fd);
+		syslog(LOG_INFO,"deleted %s",(char *)g_hash_table_lookup(hash,"device"));
+		g_hash_table_insert(hash,"note","(deleted)");
+	}
+
+	return 0;
+}
+
+
+//************************************
+// All functions after this is infrastructure (rather then callbacks)
+//************************************
+//void print_entities(GHashTable* hash,Column cols[],char * format,int displayflags)
 void print_line(GHashTable* hash,char * heading,char * loc,char * format,int flags)
 {
 	char * value=NULL;
@@ -195,10 +247,6 @@ void print_field(GHashTable* hash,char * heading,char * loc,char * format,int fl
 	return;
 }
 
-//************************************
-// All functions after this is infrastructure (rather then callbacks)
-//************************************
-//void print_entities(GHashTable* hash,Column cols[],char * format,int displayflags)
 void print_entities(GHashTable* hash,Filesearch search[],char * format)
 {
 	int i=0;
@@ -230,7 +278,7 @@ void print_headers(Filesearch search[],char * format)
 
 
 
-int get_entities(GSList ** devlist,Filesearch search[])
+int get_entities(GSList ** devlist,Filesearch search[],int displayflags)
 {
 	int j;
 	GHashTable * hash;
@@ -257,7 +305,7 @@ int get_entities(GSList ** devlist,Filesearch search[])
 			
 			hash=g_hash_table_new(&g_str_hash,&g_str_equal);
 			while((search->cols)[j].location != NULL){
-				if((search->cols)[j].func != NULL ){
+				if(((search->cols)[j].func != NULL)&&((search->cols)[j].flags & displayflags ) ){
 					((search->cols)[j].func)(hash,path,(search->cols)[j].location,search->flags);
 				}
 				j++;

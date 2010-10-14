@@ -14,13 +14,16 @@
 
 #ifndef HDIR
 
-#define HEAD 1
+#define RUN 1
+#define HEAD 2
+#define DELETE 4
 
 typedef struct _column {
 	char * heading;
 	int (*func)(GHashTable* hash,char * path,char * data,int flags);
 	char * location;
 	void (*printfunc)(GHashTable* device,char * heading,char *loc,char * format,int displayflags);
+	int flags;
 } Column;
 
 typedef struct _filesearch {
@@ -34,7 +37,9 @@ extern int get_size(GHashTable *hash,char * path,char * location,int flags);
 extern int get_file_contents(GHashTable *hash,char * path,char * location,int flags);
 extern int linkvalue(GHashTable *hash,char * path,char * location,int flags);
 extern int get_dirname(GHashTable *hash,char * path,char * location,int flags);
-extern int get_entities(GSList ** devlist,Filesearch s[]);
+extern int delete(GHashTable *hash,char * path,char * location,int flags);
+
+extern int get_entities(GSList ** devlist,Filesearch s[],int displayflags);
 
 //void print_field(GHashTable* hash,char * heading,char * loc,char* format,int flags);
 void print_field(GHashTable* hash,char * heading,char * loc,char* format,int flags);

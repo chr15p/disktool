@@ -17,29 +17,34 @@
 #include <glib.h>
 #include <getopt.h>
 #include <syslog.h>
+#include <unistd.h>
 
 #include "directory.h"
 
-
+//	heading			func			location		printfunc	flags
 Column disks[] = {
-        {"Address",		&linkvalue,		"device",		&print_field},
-        {"Device",		&get_dirname,		"hostname",		&print_field},
-        {"Size",		&get_size,		"size",			&print_field},
-        {"Vendor",		&get_file_contents,	"device/vendor",	&print_field},
-        {"Model",		&get_file_contents,	"device/model",		&print_field},
-        {NULL,			NULL,			0,			NULL}
+        {"Address",		&linkvalue,		"device",		&print_field,	RUN},
+        {"Device",		&get_dirname,		"hostname",		&print_field,	RUN},
+        {"Size",		&get_size,		"size",			&print_field,	RUN},
+        {"Vendor",		&get_file_contents,	"device/vendor",	&print_field,	RUN},
+        {"Model",		&get_file_contents,	"device/model",		&print_field,	RUN},
+        {NULL,			&delete,		"device/delete",	NULL,		DELETE},
+        {"Note",		NULL,			NULL,			&print_field,	RUN},
+        {NULL,			NULL,			0,			NULL,		RUN}
 };
 
+//	paths		filter	flags	cols
 Filesearch sections[] = {
-	{"/sys/block/","hd",HEAD,disks},
-	{"/sys/block/","sd",0,disks},
-	{NULL,NULL,0,NULL}
+	{"/sys/block/",	"hd",	HEAD,	disks},
+	{"/sys/block/",	"sd",	0,	disks},
+	{NULL,		NULL,	0,	NULL}
 };
 
 void usage(char* progname)
 {
 	printf("usage:\n");
 	printf("%s:\n",progname);
+	printf("\t-d\t\t- cleanup unused devices\n"); 
 	printf("\t-h\t\t- print this help message\n"); 
 	printf("\n");
 	exit(1);
@@ -47,6 +52,7 @@ void usage(char* progname)
 
 
 static struct option longopts[] = {
+  { "delete",  no_argument,      NULL,   'd' },
   { "help",  no_argument,      NULL,   'h' },
   { NULL,  0,  NULL,  0 }
 };
@@ -61,12 +67,23 @@ int main(int argc,char *argv[])
 	GSList * dev_list=NULL;
 	char * format="%-18s ";
 	//Filesearch sections[];
+	int displayflags=RUN;
+	uid_t userid;
+
+	userid=getuid();
 
 	opterr=0;
 
-	while((ch = getopt_long(argc, argv, "+hs",longopts,NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "+hd",longopts,NULL)) != -1)
 	{
 		switch(ch){
+			case 'd':
+				if(userid==0){
+					displayflags|=DELETE;
+				}else{
+					fprintf(stderr,"you must be root to use the -%c option\n",ch);
+				}
+				break;
 			case 'h':
 			default:
 				usage(g_path_get_basename(argv[0]));
@@ -74,14 +91,9 @@ int main(int argc,char *argv[])
 		}
 	}
 
-	//if(sections==NULL){
-	//	sections=disksections;
-	//}
-
 
 	while(sections[i].path!=NULL){
-		//printf("\n");
-		get_entities(&dev_list,&(sections[i]));
+		get_entities(&dev_list,&(sections[i]),displayflags);
 
 		
 		if(sections[i].flags== HEAD){
