@@ -17,6 +17,7 @@
 #define RUN 1
 #define HEAD 2
 #define DELETE 4
+#define DEVNO 8
 
 typedef struct _column {
 	char * heading;

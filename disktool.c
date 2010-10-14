@@ -25,12 +25,13 @@
 Column disks[] = {
         {"Address",		&linkvalue,		"device",		&print_field,	RUN},
         {"Device",		&get_dirname,		"hostname",		&print_field,	RUN},
+        {"Devno",		&get_file_contents,	"dev",			&print_field,	DEVNO},
         {"Size",		&get_size,		"size",			&print_field,	RUN},
         {"Vendor",		&get_file_contents,	"device/vendor",	&print_field,	RUN},
         {"Model",		&get_file_contents,	"device/model",		&print_field,	RUN},
         {NULL,			&delete,		"device/delete",	NULL,		DELETE},
-        {"Note",		NULL,			NULL,			&print_field,	RUN},
-        {NULL,			NULL,			0,			NULL,		RUN}
+        {NULL,			NULL,			"note",			&print_field,	RUN},
+        {NULL,			NULL,			0,			NULL,		0}
 };
 
 //	paths		filter	flags	cols
@@ -44,6 +45,7 @@ void usage(char* progname)
 {
 	printf("usage:\n");
 	printf("%s:\n",progname);
+	printf("\t-n\t\t- display device numbers\n"); 
 	printf("\t-d\t\t- cleanup unused devices\n"); 
 	printf("\t-h\t\t- print this help message\n"); 
 	printf("\n");
@@ -53,6 +55,7 @@ void usage(char* progname)
 
 static struct option longopts[] = {
   { "delete",  no_argument,      NULL,   'd' },
+  { "devno",  no_argument,      NULL,   'n' },
   { "help",  no_argument,      NULL,   'h' },
   { NULL,  0,  NULL,  0 }
 };
@@ -74,7 +77,7 @@ int main(int argc,char *argv[])
 
 	opterr=0;
 
-	while((ch = getopt_long(argc, argv, "+hd",longopts,NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "+hdn",longopts,NULL)) != -1)
 	{
 		switch(ch){
 			case 'd':
@@ -83,6 +86,9 @@ int main(int argc,char *argv[])
 				}else{
 					fprintf(stderr,"you must be root to use the -%c option\n",ch);
 				}
+				break;
+			case 'n':
+				displayflags|=DEVNO;
 				break;
 			case 'h':
 			default:

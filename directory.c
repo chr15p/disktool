@@ -251,7 +251,7 @@ void print_entities(GHashTable* hash,Filesearch search[],char * format)
 {
 	int i=0;
 
-	while((search->cols)[i].location != NULL){
+	while((search->cols)[i].flags != 0){
 		if((search->cols)[i].printfunc!=NULL){
 	       		((search->cols)[i].printfunc)(hash,(search->cols)[i].heading,(search->cols)[i].location,format,search->flags);
 		}
@@ -265,8 +265,8 @@ void print_headers(Filesearch search[],char * format)
 {
 	int i=0;
 
-	while((search->cols)[i].location != NULL){
-		if((search->cols)[i].printfunc!=NULL){
+	while((search->cols)[i].flags != 0){
+		if(((search->cols)[i].printfunc!=NULL)&&((search->cols)[i].heading!=NULL)){
 			printf(format,(search->cols)[i].heading);
 		}
 		i++;
@@ -304,7 +304,8 @@ int get_entities(GSList ** devlist,Filesearch search[],int displayflags)
 
 			
 			hash=g_hash_table_new(&g_str_hash,&g_str_equal);
-			while((search->cols)[j].location != NULL){
+			while((search->cols)[j].flags != 0){
+				//printf("flags=%d loc=%s\n",(search->cols)[j].flags,(search->cols)[j].location);
 				if(((search->cols)[j].func != NULL)&&((search->cols)[j].flags & displayflags ) ){
 					((search->cols)[j].func)(hash,path,(search->cols)[j].location,search->flags);
 				}
