@@ -36,8 +36,10 @@ Column disks[] = {
 
 //	paths		filter	flags	cols
 Filesearch sections[] = {
-	{"/sys/block/",	"hd",	HEAD,	disks},
-	{"/sys/block/",	"sd",	0,	disks},
+	{"/sys/block/",	"hd",	HEAD|HD,disks},
+	{"/sys/block/",	"sd",	SD,	disks},
+	{"/sys/block/",	"dm",	DM,	disks},
+	{"/sys/block/",	"ram",	RAM,	disks},
 	{NULL,		NULL,	0,	NULL}
 };
 
@@ -70,7 +72,7 @@ int main(int argc,char *argv[])
 	GSList * dev_list=NULL;
 	char * format="%-18s ";
 	//Filesearch sections[];
-	int displayflags=RUN;
+	int displayflags=RUN|HEAD|HD|SD;
 	uid_t userid;
 
 	userid=getuid();
@@ -99,16 +101,19 @@ int main(int argc,char *argv[])
 
 
 	while(sections[i].path!=NULL){
-		get_entities(&dev_list,&(sections[i]),displayflags);
-
+		if(sections[i].flags & displayflags){
+			get_entities(&dev_list,&(sections[i]),displayflags);
+		}
 		
-		if(sections[i].flags== HEAD){
-			print_headers(&(sections[i]),format);
+		if((sections[i].flags & HEAD)&&(displayflags & HEAD)){
+			print_headers(&(sections[i]),format,displayflags);
 		}
 	
-		if(dev_list!=NULL){	
+		if(dev_list!=NULL){
 			do{
-				print_entities((GHashTable *) dev_list->data,&(sections[i]),format);
+		                //printf("flags= %d\n",displayflags);
+
+				print_entities((GHashTable *) dev_list->data,&(sections[i]),format,displayflags);
 			}while((dev_list=g_slist_next(dev_list))!=NULL);
 		}	
 		i++;

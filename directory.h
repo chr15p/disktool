@@ -18,6 +18,10 @@
 #define HEAD 2
 #define DELETE 4
 #define DEVNO 8
+#define HD 16
+#define SD 32
+#define DM 64
+#define RAM 128
 
 typedef struct _column {
 	char * heading;
@@ -45,8 +49,8 @@ extern int get_entities(GSList ** devlist,Filesearch s[],int displayflags);
 //void print_field(GHashTable* hash,char * heading,char * loc,char* format,int flags);
 void print_field(GHashTable* hash,char * heading,char * loc,char* format,int flags);
 void print_line(GHashTable* hash,char * heading,char * loc,char* format,int flags);
-void print_entities(GHashTable* hash,Filesearch s[],char * format);
-void print_headers(Filesearch s[],char * format);
+void print_entities(GHashTable* hash,Filesearch s[],char * format,int flags);
+void print_headers(Filesearch s[],char * format,int flags);
 
 #define HDIR 1
 #endif

@@ -70,6 +70,9 @@ char *  dirname(char * path)
 	int i;
 
 	len=strlen(path);
+	if(len==0){
+		return NULL;
+	}
 	
 	for(i=len-2;i>=0;i--){
 		if(*(path+i)=='/'){
@@ -243,16 +246,20 @@ void print_field(GHashTable* hash,char * heading,char * loc,char * format,int fl
 	value=g_hash_table_lookup(hash,loc);
 	if(value!=NULL){
 		printf(format,value); 
+	}else{
+		printf(format,""); 
 	}
 	return;
 }
 
-void print_entities(GHashTable* hash,Filesearch search[],char * format)
+void print_entities(GHashTable* hash,Filesearch search[],char * format,int displayflags)
 {
 	int i=0;
 
 	while((search->cols)[i].flags != 0){
-		if((search->cols)[i].printfunc!=NULL){
+		//printf("%d %d\n",(search->cols)[i].flags,displayflags);
+		if(((search->cols)[i].printfunc!=NULL)		\
+			&& ((search->cols)[i].flags & displayflags)){
 	       		((search->cols)[i].printfunc)(hash,(search->cols)[i].heading,(search->cols)[i].location,format,search->flags);
 		}
 		i++;
@@ -261,12 +268,14 @@ void print_entities(GHashTable* hash,Filesearch search[],char * format)
 	printf("\n");
 }
 
-void print_headers(Filesearch search[],char * format)
+void print_headers(Filesearch search[],char * format,int displayflags)
 {
 	int i=0;
 
 	while((search->cols)[i].flags != 0){
-		if(((search->cols)[i].printfunc!=NULL)&&((search->cols)[i].heading!=NULL)){
+		if(((search->cols)[i].printfunc != NULL)		\
+				&&((search->cols)[i].heading!=NULL)	\
+				&&((search->cols)[i].flags & displayflags)){
 			printf(format,(search->cols)[i].heading);
 		}
 		i++;
