@@ -44,7 +44,10 @@ extern int linkvalue(GHashTable *hash,char * path,char * location,int flags);
 extern int get_dirname(GHashTable *hash,char * path,char * location,int flags);
 extern int delete(GHashTable *hash,char * path,char * location,int flags);
 
+extern void create_entity(GSList ** devlist,char *path,char *name,Filesearch search[],int displayflags,char * note);
 extern int get_entities(GSList ** devlist,Filesearch s[],int displayflags);
+extern int write_string(char* path,char * filter,char * location,char * string);
+
 
 //void print_field(GHashTable* hash,char * heading,char * loc,char* format,int flags);
 void print_field(GHashTable* hash,char * heading,char * loc,char* format,int flags);

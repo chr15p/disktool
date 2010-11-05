@@ -19,9 +19,9 @@ MANPAGE=fctool.8
 INSTALLDIR=$(INSTALL_ROOT)/usr/sbin
 MANDIR=$(INSTALL_ROOT)/usr/share/man/man8
 
-COMPILEFLAGS=$(shell pkg-config --cflags --libs glib-2.0)
+COMPILEFLAGS=$(shell pkg-config --cflags --libs glib-2.0,devmapper)
 
-LINKERFLAGS=$(shell pkg-config --cflags --libs glib-2.0)
+LINKERFLAGS=$(shell pkg-config --cflags --libs glib-2.0,devmapper)
 
 
 all: fctool 

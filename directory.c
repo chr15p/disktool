@@ -23,6 +23,7 @@
 #include <syslog.h>
 #include <dirent.h>
 
+
 #include "directory.h"
 
 #define BUFFSIZE 4096
@@ -124,10 +125,12 @@ char * file_contents(char * path,char * location)
 	char * file;
 	char * value;
 	int attrfile;
+	int i=1;
 
 	//printf("location=%s\n",location);
 	
 	file=(char*)malloc(strlen(path)+strlen(location)+1);
+	//file=(char*)calloc(1,strlen(path)+strlen(location)+1);
 	strcpy(file,path);
 	strcat(file,location);
 
@@ -137,12 +140,15 @@ char * file_contents(char * path,char * location)
 		//fprintf(stderr,"unable to open %s\n",file);
 		return NULL;
 	}
-	value=(char*) malloc(BUFFSIZE);
+	value=(char*) calloc(1,BUFFSIZE);
 	read(attrfile,value,BUFFSIZE);
-	if(*(value+strlen(value)-1)=='\n'){
+	while((*(value+strlen(value)-i)==' ')||(*(value+strlen(value)-i)=='\n')){
 		*(value+strlen(value)-1)=0;
 	}
-	//printf("location=%s value=%s\n",location,value);
+	//if(*(value+strlen(value)-1)=='\n'){
+	//	*(value+strlen(value)-1)=0;
+	//}
+	//printf("location=%s=value=%s=\n",location,value);
 	close(attrfile);
 	free(file);
 
@@ -230,7 +236,7 @@ void print_line(GHashTable* hash,char * heading,char * loc,char * format,int fla
 
 	//printf("loc=%s\n",loc);
 	value=g_hash_table_lookup(hash,loc);
-       	//printf("print_line value=%s\n",value); 
+       	//printf("print_line value=%s=\n",value); 
 	if(value!=NULL){
 		printf("%s: %s\n",heading,value); 
 	}else{
@@ -244,7 +250,8 @@ void print_field(GHashTable* hash,char * heading,char * loc,char * format,int fl
 	char * value=NULL;
 
 	value=g_hash_table_lookup(hash,loc);
-	if(value!=NULL){
+       	//printf("print loc=%s=value=%s=\n",loc,value); 
+	if(value != NULL){
 		printf(format,value); 
 	}else{
 		printf(format,""); 
@@ -285,15 +292,41 @@ void print_headers(Filesearch search[],char * format,int displayflags)
 }
 
 
+void create_entity(GSList ** devlist,char *path,char *name,Filesearch search[],int displayflags,char * note)
+{
+	char * fullpath;
+	GHashTable * hash;
+	int j=0;
+
+	fullpath=(char*)malloc(strlen(path)+strlen(name)+2);
+	strcpy(fullpath,path);
+	strcat(fullpath,name);
+	strcat(fullpath,"/");
+
+	hash=g_hash_table_new(&g_str_hash,&g_str_equal);
+	while((search->cols)[j].flags != 0){
+		if(((search->cols)[j].func != NULL)&&((search->cols)[j].flags & displayflags ) ){
+			((search->cols)[j].func)(hash,fullpath,(search->cols)[j].location,search->flags);
+		}
+		j++;
+	}
+	if(note!=NULL){
+		g_hash_table_insert(hash,"note",note);
+	}
+
+	if((hash!=NULL)&&(hash!=NULL)){
+		(*devlist)=g_slist_prepend(*devlist,hash);
+	}
+
+	free(fullpath);
+	return;
+}
 
 
 int get_entities(GSList ** devlist,Filesearch search[],int displayflags)
 {
-	int j;
-	GHashTable * hash;
 	DIR *dirstream;
 	struct dirent* entry;
-	char * path;
 
 	dirstream=opendir(search->path);
 	if(dirstream==NULL){
@@ -302,32 +335,57 @@ int get_entities(GSList ** devlist,Filesearch search[],int displayflags)
 	}
 	
 	while((entry=readdir(dirstream))!=NULL){
-		j=0;
-		//printf("j=%d %s %s %d\n",j,entry->d_name,search->filter,strlen(search->filter));
 		if(strncmp(entry->d_name,search->filter,strlen(search->filter))==0){
-			path=(char*)malloc(strlen(search->path)+strlen(entry->d_name)+2);
-			strcpy(path,search->path);
-			strcat(path,entry->d_name);
-			strcat(path,"/");
-			//printf("path=%s\n",path);
-
-			
-			hash=g_hash_table_new(&g_str_hash,&g_str_equal);
-			while((search->cols)[j].flags != 0){
-				//printf("flags=%d loc=%s\n",(search->cols)[j].flags,(search->cols)[j].location);
-				if(((search->cols)[j].func != NULL)&&((search->cols)[j].flags & displayflags ) ){
-					((search->cols)[j].func)(hash,path,(search->cols)[j].location,search->flags);
-				}
-				j++;
-			}
-			
-			if((hash!=NULL)&&(hash!=NULL)){
-	                        (*devlist)=g_slist_prepend(*devlist,hash);
-	                }
-		
-			free(path);
+			create_entity(devlist,search->path, entry->d_name,search,displayflags,"");
 		}
 	}
+	closedir(dirstream);
+	return 0;
+}
+
+
+int write_string(char* path,char * filter,char * location,char * string)
+{
+	DIR *dirstream;
+	struct dirent* entry;
+	int msglen;
+	int pathlen;
+	char * fullpath;
+	int propfile;
+	
+
+	dirstream=opendir(path);
+	if(dirstream==NULL){
+		fprintf(stderr,"unable to open %s\n",path);
+		exit(1);
+	}
+	
+
+	msglen=strlen(string);
+	pathlen=strlen(path)+strlen(location);
+
+	while((entry=readdir(dirstream))!=NULL){
+		if(strncmp(entry->d_name,filter,strlen(filter))==0){
+			fullpath=(char*)malloc(strlen(location)+pathlen);
+			strcpy(fullpath,path);
+			strcat(fullpath,entry->d_name);
+			strcat(fullpath,"/scan");
+
+			//printf("fullpath=%s %s\n",fullpath,filter);
+			//printf("Scanning %s\n",fullpath);
+			//syslog(LOG_INFO,"Scanning %s",scan_file);
+			propfile=open(fullpath,O_WRONLY);
+			if(propfile==-1){
+				fprintf(stderr,"Write_string: unable to open %s\n",fullpath);
+				return 1;
+			}
+			write(propfile,string,msglen);
+			close(propfile);
+			//syslog(LOG_INFO,"Scanned %s\n",scan_file);
+			free(fullpath);
+		}
+	}
+
 	closedir(dirstream);
 	return 0;
 }
