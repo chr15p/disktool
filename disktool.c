@@ -31,6 +31,8 @@ Column disks[] = {
         {"Device",		&get_dirname,		"hostname",		&print_field,	RUN},
         {"Devno",		&get_file_contents,	"dev",			&print_field,	DEVNO},
         {"Size",		&get_size,		"size",			&print_field,	RUN},
+        {"Mpath",		&get_mpathdev,		"mpathdev",		&print_field,	RUN},
+        {"dm-device",		&get_dmdev,		"dmdev",		&print_field,	RUN},
         {"Vendor",		&get_file_contents,	"device/vendor",	&print_field,	RUN},
         {"Model",		&get_file_contents,	"device/model",		&print_field,	RUN},
         {NULL,			&delete,		"device/delete",	NULL,		DELETE},

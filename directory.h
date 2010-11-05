@@ -43,6 +43,8 @@ extern int get_file_contents(GHashTable *hash,char * path,char * location,int fl
 extern int linkvalue(GHashTable *hash,char * path,char * location,int flags);
 extern int get_dirname(GHashTable *hash,char * path,char * location,int flags);
 extern int delete(GHashTable *hash,char * path,char * location,int flags);
+extern int get_dmdev(GHashTable *hash,char * path,char * location,int flags);
+extern int get_mpathdev(GHashTable *hash,char * path,char * location,int flags);
 
 extern void create_entity(GSList ** devlist,char *path,char *name,Filesearch search[],int displayflags,char * note);
 extern int get_entities(GSList ** devlist,Filesearch s[],int displayflags);
