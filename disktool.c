@@ -57,6 +57,7 @@ void usage(char* progname)
 	printf("\t-n\t\t- display device numbers\n"); 
 	printf("\t-d\t\t- cleanup unused devices\n"); 
 	printf("\t-s\t\t- rescan the scsi busses\n");
+	printf("\t-q\t\t- do not display column headers\n");
 	printf("\t-p [seperator]\t- seperator for output\n");
 	printf("\t-h\t\t- print this help message\n"); 
 	printf("\n");
@@ -68,6 +69,7 @@ static struct option longopts[] = {
   { "delete",	no_argument,	NULL,	'd'},
   { "devno",	no_argument,	NULL,	'n'},
   { "scan",	no_argument,	NULL,	's'},
+  { "noheaders",	no_argument,	NULL,	'q'},
   { "seperator",	required_argument,	NULL,	'p'},
   { "help",	no_argument,	NULL,	'h'},
   { NULL,  0,  NULL,  0 }
@@ -98,7 +100,7 @@ int main(int argc,char *argv[])
 
 	opterr=0;
 
-	while((ch = getopt_long(argc, argv, "+hdnsp:",longopts,NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "+hdnsqp:",longopts,NULL)) != -1)
 	{
 		switch(ch){
 			case 'd':
@@ -123,6 +125,9 @@ int main(int argc,char *argv[])
 				break;
 			case 'n':
 				displayflags|=DEVNO;
+				break;
+			case 'q':
+				displayflags &= ~HEAD;
 				break;
 			case 'h':
 			default:
