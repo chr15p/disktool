@@ -228,6 +228,74 @@ int delete(GHashTable *hash,char * path,char * location,int flags)
 	return 0;
 }
 
+int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
+{
+
+	DIR *dir;
+	struct dirent* ent;
+	char * devfile;
+	struct dm_task *dmt=0;
+	struct dm_deps *deps=0;
+	int i;
+	struct stat* statbuf;
+	gpointer dmdev;
+
+	if(dm_devnos==NULL){
+		if(!(dir=opendir("/dev/mapper"))){
+			fprintf(stderr,"unable to open %s\n","/dev/mapper");
+			exit(2);
+		}
+		dm_devnos = g_hash_table_new(&g_str_hash,&g_str_equal);
+		while((ent=readdir(dir)) != NULL){
+			if(strncmp(ent->d_name,"mpath",5)==0){
+	
+				devfile=(char*)malloc(sizeof(ent->d_name)+13);
+				strcpy(devfile,"/dev/mapper/");
+				strcat(devfile,ent->d_name);
+
+				statbuf=(char*) malloc(sizeof(struct stat));
+				if(stat(devfile,statbuf)!=0){
+					printf("stat error!\n");	
+				}
+				dmt = dm_task_create(DM_DEVICE_DEPS);
+				if(!dmt){
+					printf("create error!\n");
+					exit(1);
+				}
+	
+				dm_task_set_major(dmt,major(statbuf->st_rdev));
+				dm_task_set_minor(dmt,minor(statbuf->st_rdev));
+				if(!dm_task_run(dmt)){
+					printf("run error!\n");
+					exit(1);
+				}
+
+
+		//printf("%s%s%s/%s (%s)\n",indent,tree,dm_dir(),dm_task_get_name(dmt),blkid_devno_to_devname(devno));
+
+				deps=dm_task_get_deps(dmt);
+				if(deps==NULL){
+					printf("deps error!\n");
+					exit(1);
+				}
+	
+				for (i = 0; i < deps->count; i++){
+					g_hash_table_insert(dm_devnos,deps->device[i],ent->d_name);
+					//deps->device[i];
+				}
+				free(statbuf);
+				free(devfile);
+			}
+		}
+	}
+
+	dmdev=g_hash_table_lookup(dm_devnos,"hostname");
+			
+	g_hash_table_insert(hash,"dm",dmdev);
+	
+
+}
+
 
 int get_mpathdev(GHashTable *hash,char * path,char * location,int flags)
 {
