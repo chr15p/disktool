@@ -23,7 +23,7 @@
 #include <syslog.h>
 #include <dirent.h>
 #include <libdevmapper.h>
-
+#include <blkid/blkid.h>
 
 #include "directory.h"
 
@@ -67,7 +67,7 @@ char * size_to_human(char * blockstr)
 	return out;
 }
 
-char *  dirname(char * path)
+char *  last_element(char * path)
 {
 	char * value;
 	int len;
@@ -94,11 +94,12 @@ char *  dirname(char * path)
 }
 
 
+
 int get_dirname(GHashTable *hash,char * path,char * location,int flags)
 {
 	char * value;
 
-	value=dirname(path);
+	value=last_element(path);
 
 	g_hash_table_insert(hash,location,value);
 	return 0;
@@ -117,7 +118,7 @@ int linkvalue(GHashTable *hash,char * path,char * location,int flags)
 	value=(char*) malloc(BUFFSIZE);
 	readlink(file,value,BUFFSIZE);
 
-	g_hash_table_insert(hash,location,dirname(value));
+	g_hash_table_insert(hash,location,last_element(value));
 	free(file);
 	return 0;
 }
@@ -239,6 +240,7 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 	int i;
 	struct stat* statbuf;
 	gpointer dmdev;
+	char * device;
 
 	if(dm_devnos==NULL){
 		if(!(dir=opendir("/dev/mapper"))){
@@ -253,7 +255,7 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 				strcpy(devfile,"/dev/mapper/");
 				strcat(devfile,ent->d_name);
 
-				statbuf=(char*) malloc(sizeof(struct stat));
+				statbuf=(struct stat*) malloc(sizeof(struct stat));
 				if(stat(devfile,statbuf)!=0){
 					printf("stat error!\n");	
 				}
@@ -280,7 +282,8 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 				}
 	
 				for (i = 0; i < deps->count; i++){
-					g_hash_table_insert(dm_devnos,deps->device[i],ent->d_name);
+					device=last_element(blkid_devno_to_devname(deps->device[i]));
+					g_hash_table_insert(dm_devnos,device,ent->d_name);
 					//deps->device[i];
 				}
 				free(statbuf);
@@ -293,7 +296,7 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 			
 	g_hash_table_insert(hash,"dm",dmdev);
 	
-
+	return 0;
 }
 
 
