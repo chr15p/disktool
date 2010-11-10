@@ -292,9 +292,9 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 		}
 	}
 
-	dmdev=g_hash_table_lookup(dm_devnos,"hostname");
+	dmdev=g_hash_table_lookup(hash,"hostname");
 			
-	g_hash_table_insert(hash,"dm",dmdev);
+	g_hash_table_insert(hash,"mpathdev",g_hash_table_lookup(dm_devnos,dnmdev));
 	
 	return 0;
 }
