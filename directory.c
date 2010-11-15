@@ -242,6 +242,7 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 	struct stat* statbuf;
 	gpointer dmdev;
 	char * device;
+	char * dm;
 
 	if(mpathdevs==NULL){
 		if(!(dir=opendir("/dev/mapper"))){
@@ -262,7 +263,11 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 					printf("stat error!\n");	
 				}
 
-				g_hash_table_insert(dm_devnos,ent->d_name,blkid_devno_to_devname(statbuf->st_rdev));
+				dm=(char*)malloc(sizeof(char)*6);
+				if(dm!=NULL){
+					sprintf(dm,"dm-%d",minor(statbuf->st_rdev));
+					g_hash_table_insert(dm_devnos,ent->d_name,dm);
+				}
 
 				dmt = dm_task_create(DM_DEVICE_DEPS);
 				if(!dmt){
