@@ -242,7 +242,6 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 	struct stat* statbuf;
 	gpointer dmdev;
 	char * device;
-	char * dm;
 
 	if(mpathdevs==NULL){
 		if(!(dir=opendir("/dev/mapper"))){
@@ -263,11 +262,7 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 					printf("stat error!\n");	
 				}
 
-				dm=(char*)malloc(sizeof(char)*6);
-				if(dm!=NULL){
-					sprintf(dm,"dm-%d",minor(statbuf->st_rdev));
-					g_hash_table_insert(dm_devnos,ent->d_name,dm);
-				}
+				g_hash_table_insert(dm_devnos,ent->d_name,blkid_devno_to_devname(statbuf->st_rdev));
 
 				dmt = dm_task_create(DM_DEVICE_DEPS);
 				if(!dmt){
@@ -282,9 +277,6 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 					exit(1);
 				}
 
-
-		//printf("%s%s%s/%s (%s)\n",indent,tree,dm_dir(),dm_task_get_name(dmt),blkid_devno_to_devname(devno));
-
 				deps=dm_task_get_deps(dmt);
 				if(deps==NULL){
 					printf("deps error!\n");
@@ -294,7 +286,6 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 				for (i = 0; i < deps->count; i++){
 					device=last_element(blkid_devno_to_devname(deps->device[i]));
 					g_hash_table_insert(mpathdevs,device,ent->d_name);
-					//deps->device[i];
 				}
 				free(statbuf);
 				free(devfile);
@@ -309,13 +300,19 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 	return 0;
 }
 
+
 int get_dmdev2(GHashTable *hash,char * path,char * location,int flags)
 {
 	char * dmdev;
 
         dmdev=g_hash_table_lookup(hash,"mpathdev");
-        g_hash_table_insert(hash,"dmdev",dmdev);
+	if(dmdev!=NULL){
+		g_hash_table_insert(hash,"dmdev",g_hash_table_lookup(dm_devnos,dmdev));
+	}
+
+	return 0;
 }
+
 
 int get_mpathdev(GHashTable *hash,char * path,char * location,int flags)
 {
