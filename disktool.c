@@ -31,8 +31,8 @@ Column disks[] = {
         {"Device",		&get_dirname,		"hostname",		&print_field,	RUN},
         {"Devno",		&get_file_contents,	"dev",			&print_field,	DEVNO},
         {"Size",		&get_size,		"size",			&print_field,	RUN},
-        {"Mpath",		&get_mpathdev2,		"mpathdev",		&print_field,	RUN},
-        {"DM",			&get_dmdev2,		"dmdev",		&print_field,	RUN},
+        {"Mpath",		&get_mpathdev2,		"mpathdev",		&print_field,	MULTIPATH},
+        {"DM",			&get_dmdev2,		"dmdev",		&print_field,	MULTIPATH},
         {"Vendor",		&get_file_contents,	"device/vendor",	&print_field,	RUN},
         {"Model",		&get_file_contents,	"device/model",		&print_field,	RUN},
         {NULL,			&delete,		"device/delete",	NULL,		DELETE},
@@ -58,6 +58,7 @@ void usage(char* progname)
 	printf("\t-d\t\t- cleanup unused devices\n"); 
 	printf("\t-s\t\t- rescan the scsi busses\n");
 	printf("\t-q\t\t- do not display column headers\n");
+	printf("\t-m\t\t- display associated multipath devices\n");
 	printf("\t-p [seperator]\t- seperator for output\n");
 	printf("\t-h\t\t- print this help message\n"); 
 	printf("\n");
@@ -70,6 +71,7 @@ static struct option longopts[] = {
   { "devno",	no_argument,	NULL,	'n'},
   { "scan",	no_argument,	NULL,	's'},
   { "noheaders",	no_argument,	NULL,	'q'},
+  { "multipath",	no_argument,	NULL,	'm'},
   { "seperator",	required_argument,	NULL,	'p'},
   { "help",	no_argument,	NULL,	'h'},
   { NULL,  0,  NULL,  0 }
@@ -84,7 +86,7 @@ int main(int argc,char *argv[])
 	int k;
 	char ch;
 	GSList * dev_list=NULL;
-	char * format="%-18s ";
+	char * format="%-16s ";
 	//Filesearch sections[];
 	int displayflags=RUN|HEAD|HD|SD;
 	uid_t userid;
@@ -100,7 +102,7 @@ int main(int argc,char *argv[])
 
 	opterr=0;
 
-	while((ch = getopt_long(argc, argv, "+hdnsqp:",longopts,NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "+hdnsqmp:",longopts,NULL)) != -1)
 	{
 		switch(ch){
 			case 'd':
@@ -125,6 +127,9 @@ int main(int argc,char *argv[])
 				break;
 			case 'n':
 				displayflags|=DEVNO;
+				break;
+			case 'm':
+				displayflags|=MULTIPATH;
 				break;
 			case 'q':
 				displayflags &= ~HEAD;

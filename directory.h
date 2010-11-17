@@ -22,6 +22,7 @@
 #define SD 32
 #define DM 64
 #define RAM 128
+#define MULTIPATH 256
 
 typedef struct _column {
 	char * heading;
