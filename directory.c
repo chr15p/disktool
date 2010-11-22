@@ -32,6 +32,51 @@
 GHashTable * mpathdevs=NULL;
 GHashTable * dm_devnos=NULL;
 
+gint compare_addresses(gconstpointer a,gconstpointer b)
+{
+	char *astr;
+	char *bstr;
+	char *end_a;
+	char *end_b;
+	int a_part;
+	int b_part;
+	char *alen;
+	char *blen;
+
+
+	astr=g_hash_table_lookup((GHashTable *)a,"scsiid");
+	bstr=g_hash_table_lookup((GHashTable *)b,"scsiid");
+
+	if((astr==NULL)&&(bstr==NULL)){
+		return 0;
+	}else if((astr==NULL)&&(bstr!=NULL)){
+		return -1;
+	}else if((astr!=NULL)&&(bstr==NULL)){
+		return 1;
+	}
+
+	alen=astr+strlen(astr);
+	blen=bstr+strlen(bstr);
+
+	while((astr<=alen)&&(bstr<=blen)){
+		//printf("%s %s\n",astr,bstr);
+		a_part=strtol(astr,&end_a,10);
+		b_part=strtol(bstr,&end_b,10);
+		//printf("%d %d\n",a_part,b_part);
+		if(a_part>b_part){
+			return 1;
+		}else if(a_part<b_part){
+			return -1;
+		}
+		astr=end_a+1;
+		bstr=end_b+1;
+	}
+
+	return 0;
+}
+
+
+
 
 char * size_to_human(char * blockstr)
 {

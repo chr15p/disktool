@@ -97,6 +97,7 @@ int main(int argc,char *argv[])
 	char buf[1024];
 	time_t tend;
 	struct inotify_event *event;
+	gint (*sortfunc)(gconstpointer a,gconstpointer b)=&compare_addresses;
 
 	userid=getuid();
 
@@ -141,6 +142,7 @@ int main(int argc,char *argv[])
 		}
 	}
 
+	
 
 	while(sections[i].path!=NULL){
 		if(sections[i].flags & displayflags){
@@ -205,6 +207,7 @@ int main(int argc,char *argv[])
 	}
 	endscan:
 
+	dev_list=g_slist_sort(dev_list,sortfunc);
 
 	i=0;
 	while(sections[i].path!=NULL){

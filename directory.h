@@ -53,6 +53,7 @@ extern void create_entity(GSList ** devlist,char *path,char *name,Filesearch sea
 extern int get_entities(GSList ** devlist,Filesearch s[],int displayflags);
 extern int write_string(char* path,char * filter,char * location,char * string);
 
+extern gint compare_addresses(gconstpointer a,gconstpointer b);
 
 //void print_field(GHashTable* hash,char * heading,char * loc,char* format,int flags);
 void print_field(GHashTable* hash,char * heading,char * loc,char* format,int flags);
