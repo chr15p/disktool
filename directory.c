@@ -44,8 +44,8 @@ gint compare_addresses(gconstpointer a,gconstpointer b)
 	char *blen;
 
 
-	astr=g_hash_table_lookup((GHashTable *)a,"scsiid");
-	bstr=g_hash_table_lookup((GHashTable *)b,"scsiid");
+	astr=g_hash_table_lookup((GHashTable *)a,"device");
+	bstr=g_hash_table_lookup((GHashTable *)b,"device");
 
 	if((astr==NULL)&&(bstr==NULL)){
 		return 0;
