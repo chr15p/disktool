@@ -169,7 +169,8 @@ int main(int argc,char *argv[])
 		}
 		fcntl(fd,F_SETFL,O_NONBLOCK);
 
-		write_string("/sys/class/scsi_host/","host","scan","- - -");
+		//write_string("/sys/class/scsi_host/","host","scan","- - -");
+		write_string("/sys/class/fc_host/","host","issue_lip","1");
 
 		tend=time(NULL)+30;
 		while(time(NULL)<tend){
