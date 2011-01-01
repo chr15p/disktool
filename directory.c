@@ -275,6 +275,7 @@ int delete(GHashTable *hash,char * path,char * location,int flags)
 	return 0;
 }
 
+
 int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 {
 
@@ -599,14 +600,17 @@ int write_string(char* path,char * filter,char * location,char * string)
 	
 
 	msglen=strlen(string);
-	pathlen=strlen(path)+strlen(location);
+	pathlen=strlen(path)+strlen(location)+3;
 
 	while((entry=readdir(dirstream))!=NULL){
 		if(strncmp(entry->d_name,filter,strlen(filter))==0){
-			fullpath=(char*)malloc(strlen(location)+pathlen);
+			//fullpath=(char*)malloc(strlen(location)+pathlen);
+			fullpath=(char*)malloc(strlen(entry->d_name)+pathlen);
 			strcpy(fullpath,path);
+			strcat(fullpath,"/");
 			strcat(fullpath,entry->d_name);
-			strcat(fullpath,"/scan");
+			strcat(fullpath,"/");
+			strcat(fullpath,location);
 
 			//printf("fullpath=%s %s\n",fullpath,filter);
 			//printf("Scanning %s\n",fullpath);
