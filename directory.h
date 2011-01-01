@@ -44,6 +44,7 @@ extern int get_file_contents(GHashTable *hash,char * path,char * location,int fl
 extern int linkvalue(GHashTable *hash,char * path,char * location,int flags);
 extern int get_dirname(GHashTable *hash,char * path,char * location,int flags);
 extern int delete(GHashTable *hash,char * path,char * location,int flags);
+extern int rescan(GHashTable *hash,char * path,char * location,int flags);
 extern int get_dmdev(GHashTable *hash,char * path,char * location,int flags);
 extern int get_mpathdev(GHashTable *hash,char * path,char * location,int flags);
 extern int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags);

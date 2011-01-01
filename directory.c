@@ -276,6 +276,43 @@ int delete(GHashTable *hash,char * path,char * location,int flags)
 }
 
 
+int rescan(GHashTable *hash,char * path,char * location,int flags)
+{
+	char * rescanfile;
+	int rescan_fd;
+	char * oldsize;
+	char * size;
+	char * blocks;
+
+	rescanfile=(char*)malloc(strlen(path)+strlen(location)+1);
+	strcpy(rescanfile,path);
+	strcat(rescanfile,location);
+	rescan_fd=open(rescanfile,O_WRONLY);
+	if(rescan_fd==-1){
+		fprintf(stderr,"unable to open %s\n",rescanfile);
+		return 1;
+	}
+	write(rescan_fd,"1",strlen("1"));
+	close(rescan_fd);
+
+	oldsize=g_hash_table_lookup(hash,"size");
+
+	blocks=file_contents(path,location);
+	if(blocks!=NULL){
+		size=size_to_human(blocks);
+	
+		if(strcmp(size,oldsize)!=0){
+			syslog(LOG_INFO,"resized %s",(char *)g_hash_table_lookup( hash,"device"));
+			g_hash_table_replace(hash,"size",size);
+			g_hash_table_insert(hash,"note","(resized)");
+		}
+	}
+
+	return 0;
+}
+
+
+
 int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 {
 

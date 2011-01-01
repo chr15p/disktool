@@ -35,6 +35,7 @@ Column disks[] = {
         {"DM",			&get_dmdev2,		"dmdev",		&print_field,	MULTIPATH},
         {"Vendor",		&get_file_contents,	"device/vendor",	&print_field,	RUN},
         {"Model",		&get_file_contents,	"device/model",		&print_field,	RUN},
+        {NULL,			&rescan,		"device/rescan",	NULL,		DELETE},
         {NULL,			&delete,		"device/delete",	NULL,		DELETE},
         {NULL,			NULL,			"note",			&print_field,	RUN},
         {NULL,			NULL,			0,			NULL,		0}
