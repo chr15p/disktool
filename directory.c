@@ -192,13 +192,11 @@ char * file_contents(char * path,char * location)
 		//fprintf(stderr,"unable to open %s\n",file);
 		return NULL;
 	}
-	//value=(char*) calloc(BUFFSIZE,sizeof(char));
-	value=(char*) malloc(BUFFSIZE);
+	value=(char*) calloc(BUFFSIZE,sizeof(char));
 	read(attrfile,value,BUFFSIZE);
 	while((*(value+strlen(value)-i)==' ')||(*(value+strlen(value)-i)=='\n')){
 		*(value+strlen(value)-1)=0;
 	}
-	*(value+strlen(value))=0;
 	//if(*(value+strlen(value)-1)=='\n'){
 	//	*(value+strlen(value)-1)=0;
 	//}
@@ -274,6 +272,7 @@ int delete(GHashTable *hash,char * path,char * location,int flags)
 		close(delete_fd);
 		syslog(LOG_INFO,"deleted %s",(char *)g_hash_table_lookup(hash,"device"));
 		g_hash_table_insert(hash,"note","(deleted)");
+		free(deletefile);
 	}
 
 	return 0;
@@ -294,6 +293,7 @@ int rescan(GHashTable *hash,char * path,char * location,int flags)
 	rescan_fd=open(rescanfile,O_WRONLY);
 	if(rescan_fd==-1){
 		fprintf(stderr,"unable to open %s\n",rescanfile);
+		free(rescanfile);
 		return 1;
 	}
 	write(rescan_fd,"1",strlen("1"));
@@ -311,6 +311,8 @@ int rescan(GHashTable *hash,char * path,char * location,int flags)
 			g_hash_table_insert(hash,"note","(resized)");
 		}
 	}
+
+	free(rescanfile);
 
 	return 0;
 }
@@ -476,6 +478,8 @@ int get_dmdev(GHashTable *hash,char * path,char * location,int flags)
 					devno=(dev_t*)malloc(sizeof(dev_t));
 					*devno=statbuf->st_rdev;
 					g_hash_table_insert(dm_devnos,devno,name);
+				}else{
+					free(name);
 				}
 				free(statbuf);
 			}
@@ -496,6 +500,8 @@ int get_dmdev(GHashTable *hash,char * path,char * location,int flags)
 			dmdev=g_hash_table_lookup(dm_devnos,&(statbuf->st_rdev));
 			
 			g_hash_table_insert(hash,"dm",dmdev);
+		}else{
+			free(name);
 		}
 		free(statbuf);
 		
