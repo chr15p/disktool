@@ -156,13 +156,15 @@ int linkvalue(GHashTable *hash,char * path,char * location,int flags)
 {
 	char *file;
 	char *value;
+	int len;
 
 	file=(char*)malloc(strlen(path)+strlen(location)+1);
 	strcpy(file,path);
 	strcat(file,location);
 
 	value=(char*) malloc(BUFFSIZE);
-	readlink(file,value,BUFFSIZE);
+	len=readlink(file,value,BUFFSIZE);
+	*(value+len)=0;
 
 	g_hash_table_insert(hash,location,last_element(value));
 	free(file);
@@ -190,11 +192,13 @@ char * file_contents(char * path,char * location)
 		//fprintf(stderr,"unable to open %s\n",file);
 		return NULL;
 	}
-	value=(char*) calloc(1,BUFFSIZE);
+	//value=(char*) calloc(BUFFSIZE,sizeof(char));
+	value=(char*) malloc(BUFFSIZE);
 	read(attrfile,value,BUFFSIZE);
 	while((*(value+strlen(value)-i)==' ')||(*(value+strlen(value)-i)=='\n')){
 		*(value+strlen(value)-1)=0;
 	}
+	*(value+strlen(value))=0;
 	//if(*(value+strlen(value)-1)=='\n'){
 	//	*(value+strlen(value)-1)=0;
 	//}
