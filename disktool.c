@@ -193,7 +193,8 @@ int main(int argc,char *argv[])
 				event=&buf[j];
 				k=0;
 				while(sections[k].path!=NULL){
-		        	        if(strncmp(event->name,sections[k].filter,strlen(sections[k].filter))==0){
+		        	        if((sections[i].flags & displayflags)
+						&&(strncmp(event->name,sections[k].filter,strlen(sections[k].filter))==0)){
 						//printf("added %s %s\n",event->name,sections[k].filter);
 						create_entity(&dev_list,"/sys/block/",event->name,&(sections[k]),displayflags,"(added)");
 						
