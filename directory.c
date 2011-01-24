@@ -621,7 +621,7 @@ int get_entities(GSList ** devlist,Filesearch search[],int displayflags)
 	
 	while((entry=readdir(dirstream))!=NULL){
 		if(strncmp(entry->d_name,search->filter,strlen(search->filter))==0){
-			create_entity(devlist,search->path, entry->d_name,search,displayflags,"");
+			create_entity(devlist,search->path, entry->d_name,search,displayflags,NULL);
 		}
 	}
 	closedir(dirstream);
