@@ -23,6 +23,7 @@
 #define DM 64
 #define RAM 128
 #define MULTIPATH 256
+#define LOOP 512
 
 typedef struct _column {
 	char * heading;

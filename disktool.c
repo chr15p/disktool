@@ -47,6 +47,7 @@ Filesearch sections[] = {
 	{"/sys/block/",	"sd",	SD,	disks},
 	{"/sys/block/",	"dm",	DM,	disks},
 	{"/sys/block/",	"ram",	RAM,	disks},
+	{"/sys/block/",	"loop",	LOOP,	disks},
 	{NULL,		NULL,	0,	NULL}
 };
 
@@ -74,6 +75,10 @@ static struct option longopts[] = {
   { "noheaders",	no_argument,	NULL,	'q'},
   { "multipath",	no_argument,	NULL,	'm'},
   { "seperator",	required_argument,	NULL,	'p'},
+  { "sd",	no_argument,	NULL,	'z'},
+  { "ram",	no_argument,	NULL,	'r'},
+  { "loop",	no_argument,	NULL,	'l'},
+  { "dm",	no_argument,	NULL,	'a'},
   { "help",	no_argument,	NULL,	'h'},
   { NULL,  0,  NULL,  0 }
 };
@@ -89,7 +94,8 @@ int main(int argc,char *argv[])
 	GSList * dev_list=NULL;
 	char * format="%-16s ";
 	//Filesearch sections[];
-	int displayflags=RUN|HEAD|HD|SD;
+	int displayflags=RUN|HEAD;
+	int filterflags=0;
 	uid_t userid;
 	int scanflag=0;
 	int fd;
@@ -104,7 +110,7 @@ int main(int argc,char *argv[])
 
 	opterr=0;
 
-	while((ch = getopt_long(argc, argv, "+hdnsqmp:",longopts,NULL)) != -1)
+	while((ch = getopt_long(argc, argv, "+hdnsqmzrlap:",longopts,NULL)) != -1)
 	{
 		switch(ch){
 			case 'd':
@@ -136,6 +142,18 @@ int main(int argc,char *argv[])
 			case 'q':
 				displayflags &= ~HEAD;
 				break;
+			case 'z':
+				filterflags |= HD|SD;
+				break;
+			case 'r':
+				filterflags |= RAM;
+				break;
+			case 'l':
+				filterflags |= LOOP;
+				break;
+			case 'a':
+				filterflags |= DM;
+				break;
 			case 'h':
 			default:
 				usage(g_path_get_basename(argv[0]));
@@ -143,10 +161,13 @@ int main(int argc,char *argv[])
 		}
 	}
 
+	if(filterflags==0){
+		filterflags=HD|SD;
+	}
 	
 
 	while(sections[i].path!=NULL){
-		if(sections[i].flags & displayflags){
+		if(sections[i].flags & filterflags){
 			get_entities(&dev_list,&(sections[i]),displayflags);
 		}
 		i++;
@@ -193,7 +214,7 @@ int main(int argc,char *argv[])
 				event=&buf[j];
 				k=0;
 				while(sections[k].path!=NULL){
-		        	        if((sections[i].flags & displayflags)
+		        	        if((sections[i].flags & filterflags)
 						&&(strncmp(event->name,sections[k].filter,strlen(sections[k].filter))==0)){
 						//printf("added %s %s\n",event->name,sections[k].filter);
 						create_entity(&dev_list,"/sys/block/",event->name,&(sections[k]),displayflags,"(added)");
