@@ -24,7 +24,7 @@ COMPILEFLAGS=$(shell pkg-config --cflags --libs glib-2.0,devmapper,blkid)
 LINKERFLAGS=$(shell pkg-config --cflags --libs glib-2.0,devmapper,blkid)
 
 
-all: fctool 
+all: fctool doc
 
 fctool: $(OBJ) $(HEADERS)
 	$(CC) $(OBJ) -o $(EXE) $(LINKERFLAGS) $(CFLAGS) $(PPFLAGS) 
