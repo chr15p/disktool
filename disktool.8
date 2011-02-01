@@ -1,0 +1,54 @@
+\"  Copyright (C) 2011 Chris Procter
+.\"
+.\" This file is part of disktool.
+.\"
+.\" This copyrighted material is made available to anyone wishing to use,
+.\" modify, copy, or redistribute it subject to the terms and conditions
+.\" of the GNU General Public License v.2.
+.\"
+.\" You should haqqve received a copy of the GNU General Public License
+.\" along with this program; if not, write to the Free Software Foundation,
+.\" Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+.\"
+.TH SCSI_ADMIN 8 "January 2011" "" ""
+.SH NAME
+scsi_admin \- Display attached devices and their scsi addresses.
+.SH SYNOPSIS
+.BI scsi_admin
+.BI " [\-d]  [\-h] [\-p " seperator "] [\-q] [\-s] [\-n] [\-m]
+.SH "DESCRIPTION"
+When run without options 
+.B scsi_admin
+displays the address, device node, vendor and model of each scsi device attached to the system. This information is gathered by querying hal.
+
+.SH Options
+.TP
+.BI \-d,\ \-\-clean 
+Delete scsi devices that the operating system still believes exist but do not. These are determined by attempting to read a handfull of bytes from the start of the device. If it can be read from its kept, if it cannot be read from (i.e. an error is generated) then delete the device from the operating systems table of available devices.
+.TP
+.BI \-h,\ \-\-help 
+Display a short help message  
+.TP
+.BI \-p,\ \-\-separator\=\fI[seperator]\fR
+Use the supplied string as the column seperator rather then the default variable number of spaces 
+.TP
+.BI \-q,\ \-\-noheaders
+Quiet. Do not print column headers
+.TP
+.BI \-s,\ \-\-scan 
+Rescan to detect newly added devices by issuing a lip command to the fc host device. This does not remove old devices (see 
+.BI \-d
+)
+.TP
+.BI \-n,\ \-\-device
+Number. Display the major and minor numbers of any devices found.
+.TP
+.BI \-m,\ \-\-mapper
+Mapper. Display the dm-multipath usage (if any) for this device.
+.TP
+.BR
+.SH "SEE ALSO"
+.BR scsi_id (8), sysfs(2)
+.SH AUTHORS
+Developed by Chris Procter <chris@chrisprocter.co.uk>
+

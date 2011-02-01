@@ -15,7 +15,7 @@ CFLAGS=-Wall -g
 EXE=disktool 
 OBJ=disktool.o directory.o
 HEADERS=directory.h
-MANPAGE=fctool.8
+MANPAGE=disktool.8
 INSTALLDIR=$(INSTALL_ROOT)/usr/sbin
 MANDIR=$(INSTALL_ROOT)/usr/share/man/man8
 
