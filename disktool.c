@@ -33,6 +33,7 @@ Column disks[] = {
         {"Size",		&get_size,		"size",			&print_field,	RUN},
         {"Mpath",		&get_mpathdev2,		"mpathdev",		&print_field,	MULTIPATH},
         {"DM",			&get_dmdev2,		"dmdev",		&print_field,	MULTIPATH},
+        {"DM devno",		&get_dmdevno,		"dmdevno",		&print_field,	MULTIPATH},
         {"Vendor",		&get_file_contents,	"device/vendor",	&print_field,	RUN},
         {"Model",		&get_file_contents,	"device/model",		&print_field,	RUN},
         {NULL,			&rescan,		"device/rescan",	NULL,		DELETE},

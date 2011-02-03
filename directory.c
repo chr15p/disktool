@@ -30,6 +30,7 @@
 #define BUFFSIZE 4096
 
 GHashTable * mpathdevs=NULL;
+GHashTable * dm_devnames=NULL;
 GHashTable * dm_devnos=NULL;
 
 gint compare_addresses(gconstpointer a,gconstpointer b)
@@ -351,7 +352,8 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 					printf("stat error!\n");	
 				}
 
-				g_hash_table_insert(dm_devnos,ent->d_name,blkid_devno_to_devname(statbuf->st_rdev));
+				g_hash_table_insert(dm_devnames,ent->d_name,blkid_devno_to_devname(statbuf->st_rdev));
+				g_hash_table_insert(dm_devnos,ent->d_name,&(statbuf->st_rdev));
 
 				dmt = dm_task_create(DM_DEVICE_DEPS);
 				if(!dmt){
@@ -384,7 +386,7 @@ int get_mpathdev2(GHashTable *hash,char * path,char * location,int flags)
 
 	dmdev=g_hash_table_lookup(hash,"hostname");
 			
-	g_hash_table_insert(hash,"mpathdev",g_hash_table_lookup(mpathdevs,dmdev));
+	g_hash_table_insert(hash,location,g_hash_table_lookup(mpathdevs,dmdev));
 	
 	return 0;
 }
@@ -396,12 +398,26 @@ int get_dmdev2(GHashTable *hash,char * path,char * location,int flags)
 
         dmdev=g_hash_table_lookup(hash,"mpathdev");
 	if(dmdev!=NULL){
-		g_hash_table_insert(hash,"dmdev",g_hash_table_lookup(dm_devnos,dmdev));
+		g_hash_table_insert(hash,location,g_hash_table_lookup(dm_devnames,dmdev));
 	}
 
 	return 0;
 }
 
+int get_dmdevno(GHashTable *hash,char * path,char * location,int flags)
+{
+	dev_t *dmdev;
+	char * val;
+
+        dmdev=g_hash_table_lookup(hash,"mpathdev");
+	if(dmdev!=NULL){
+		val=(char*)malloc(10*sizeof(char));
+		snprintf(val,10*sizeof(char),"%d:%d",major(*dmdev),minor(*dmdev));
+		g_hash_table_insert(hash,location,val);
+	}
+
+	return 0;
+}
 
 //************************************
 // All functions after this is infrastructure (rather then callbacks)
