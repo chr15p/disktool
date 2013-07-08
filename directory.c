@@ -222,6 +222,32 @@ int get_size(GHashTable *hash,char * path,char * location,int flags)
 	return 0;
 }
 
+int get_scheduler(GHashTable *hash,char * path,char * location,int flags)
+{
+	char * blocks;
+	int i=0;
+	int start=-1;
+
+	blocks=file_contents(path,location);
+	if(blocks==NULL){
+		return 0;
+	}
+	while((*(blocks+i) != ']')&&(*(blocks+i)!=0)){
+		if(*(blocks+i)=='['){
+			start=i;
+		}
+		i++;
+	}
+	*(blocks+i)=0;
+	if(start != -1){
+		g_hash_table_insert(hash,location,blocks+start+1);
+	}else{
+		g_hash_table_insert(hash,location,blocks);
+	}
+
+	return 0;
+}
+
 
 int get_file_contents(GHashTable *hash,char * path,char * location,int flags)
 {
@@ -457,9 +483,9 @@ void print_entities(GHashTable* hash,Filesearch search[],char * format,int displ
 	int i=0;
 
 	while((search->cols)[i].flags != 0){
-		//printf("%d %d\n",(search->cols)[i].flags,displayflags);
+		//printf(" %d=%d=%d ",(search->cols)[i].flags,displayflags,((search->cols)[i].flags & displayflags));
 		if(((search->cols)[i].printfunc!=NULL)		\
-			&& ((search->cols)[i].flags & displayflags)){
+			&& (((search->cols)[i].flags & displayflags)!=0)){
 	       		((search->cols)[i].printfunc)(hash,(search->cols)[i].heading,(search->cols)[i].location,format,search->flags);
 		}
 		i++;
