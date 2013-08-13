@@ -1,0 +1,52 @@
+
+DISKTOOL(8)                                                                                                                            DISKTOOL(8)
+
+
+
+NAME
+       disktool - Display attached devices and their scsi addresses.
+
+SYNOPSIS
+       disktool  [-d]  [-h] [-p seperator] [-q] [-s] [-n] [-m]
+
+DESCRIPTION
+       When  run  without  options  disktool  displays the address, device node, vendor and model of each scsi device attached to the system. This
+       information is gathered by querying hal.
+
+
+Options
+       -d, --clean
+              Delete scsi devices that the operating system still believes exist but do not. These are determined by attempting to read a handfull
+              of  bytes from the start of the device. If it can be read from its kept, if it cannot be read from (i.e. an error is generated) then
+              delete the device from the operating systems table of available devices.
+
+       -h, --help
+              Display a short help message
+
+       -p, --separator=[seperator]
+              Use the supplied string as the column seperator rather then the default variable number of spaces
+
+       -q, --noheaders
+              Quiet. Do not print column headers
+
+       -s, --scan
+              Rescan to detect newly added devices by issuing a lip command to the fc host device. This does not remove old devices (see -d )
+
+       -n, --device
+              Number. Display the major and minor numbers of any devices found.
+
+       -m, --mapper
+              Mapper. Display the dm-multipath usage (if any) for this device.
+
+
+
+SEE ALSO
+       scsi_id(8),sysfs(2)
+
+AUTHORS
+       Developed by Chris Procter <chris@chrisprocter.co.uk>
+
+
+
+
+                                                                   January 2011                                                        DISKTOOL(8)
